@@ -13,38 +13,45 @@ public class RentalInfo {
     int frequentEnterPoints = 0;
     String result = "Rental Record for " + customer.getName() + "\n";
     for (MovieRental r : customer.getRentals()) {
-      double thisAmount = 0;
-
-      // determine amount for each movie
-      if (movies.get(r.getMovieId()).getCode().equals("regular")) {
-        thisAmount = 2;
-        if (r.getDays() > 2) {
-          thisAmount = ((r.getDays() - 2) * 1.5) + thisAmount;
-        }
-      }
-      if (movies.get(r.getMovieId()).getCode().equals("new")) {
-        thisAmount = r.getDays() * 3;
-      }
-      if (movies.get(r.getMovieId()).getCode().equals("childrens")) {
-        thisAmount = 1.5;
-        if (r.getDays() > 3) {
-          thisAmount = ((r.getDays() - 3) * 1.5) + thisAmount;
-        }
-      }
-
-      //add frequent bonus points
-      frequentEnterPoints++;
-      // add bonus for a two day new release rental
-      if (movies.get(r.getMovieId()).getCode() == "new" && r.getDays() > 2) frequentEnterPoints++;
+      String movieCode = movies.get(r.getMovieId()).getCode();
+      double thisAmount = calculateAmount(movieCode, r.getDays());
+      int bonusPoints = calculateBonusPoints(movieCode, r.getDays());
 
       //print figures for this rental
       result += "\t" + movies.get(r.getMovieId()).getTitle() + "\t" + thisAmount + "\n";
-      totalAmount = totalAmount + thisAmount;
+      totalAmount += thisAmount;
+      frequentEnterPoints += bonusPoints;
     }
     // add footer lines
     result += "Amount owed is " + totalAmount + "\n";
     result += "You earned " + frequentEnterPoints + " frequent points\n";
 
     return result;
+  }
+
+  private double calculateAmount(String movieCode, int days) {
+    double amount = 0;
+    if (movieCode.equals("regular")) {
+      amount = 2;
+      if (days > 2) {
+        amount += (days - 2) * 1.5;
+      }
+    } else if (movieCode.equals("new")) {
+      amount = days * 3;
+    } else if (movieCode.equals("childrens")) {
+      amount = 1.5;
+      if (days > 3) {
+        amount += (days - 3) * 1.5;
+      }
+    }
+    return amount;
+  }
+
+  private int calculateBonusPoints(String movieCode, int days) {
+    int bonusPoints = 1;
+    if (movieCode.equals("new") && days > 2) {
+      bonusPoints++;
+    }
+    return bonusPoints;
   }
 }
